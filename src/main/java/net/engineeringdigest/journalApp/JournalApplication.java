@@ -1,4 +1,4 @@
-package net.engineeringdigest.journalApp;
+package net.engineeringdigest.journalApp; // it scans full package for component and scan classes in this folder
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

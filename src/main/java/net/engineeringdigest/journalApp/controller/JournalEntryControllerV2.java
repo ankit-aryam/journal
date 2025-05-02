@@ -4,6 +4,8 @@ import net.engineeringdigest.journalApp.entity.JournalEntry;
 import net.engineeringdigest.journalApp.service.JournalEntryServices;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,24 +25,38 @@ public class JournalEntryControllerV2 {
     }
 
     @PostMapping
-    public JournalEntry createEntry(@RequestBody JournalEntry myEntry){
+    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry myEntry){
 
-        myEntry.setDate(LocalDateTime.now());
-        journalEntryServices.saveEntry(myEntry);
-        return myEntry;
+        try{
+            myEntry.setDate(LocalDateTime.now());
+            journalEntryServices.saveEntry(myEntry);
+            return new ResponseEntity<>(myEntry, HttpStatus.OK);
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @GetMapping("id/{myId}")
-    public JournalEntry getJournalEntryById(@PathVariable ObjectId myId){
+    public ResponseEntity<JournalEntry> getJournalEntryById(@PathVariable ObjectId myId){
 
-        return journalEntryServices.findById(myId).orElse(null);
+//        return journalEntryServices.findById(myId).orElse(null);
+        Optional<JournalEntry> journalEntry = journalEntryServices.findById(myId);
+        if(journalEntry.isPresent()){
+            return new ResponseEntity<>(journalEntry.get(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("id/{id}")
-    public boolean deleteJournalEntryById(@PathVariable ObjectId id){
-
-         journalEntryServices.deleteById(id);
-         return true;
+    public ResponseEntity<?> deleteJournalEntryById(@PathVariable ObjectId id){
+        try {
+            return new ResponseEntity<>(journalEntryServices.deleteById(id), HttpStatus.OK);
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
     }
 
     @PutMapping("id/{id}")
